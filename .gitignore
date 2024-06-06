@@ -1,0 +1,33 @@
+# ################  Ignore extension files: ############
+
+*.pdf
+*.eps
+*.log
+*.png
+*.fig
+*.mat
+
+# ######### SPECIFIC FILES ##########33
+caca*.*
+temp.py
+test.zip
+test01.py
+test02.py
+test*.py
+
+# ################# Auto things and OS ###########
+
+.DS_Store
+Thumbs.db
+__pycache__/
+
+
+# MeasureInletOutlet/Photos/: Ignores all files and subdirectories in the MeasureInletOutlet/Photos/ directory
+
+# ################ FOLDERS ##################
+
+Delete/
+Dismiss/
+ProcessedWithoutQfactorGOF/
+Figures/
+
