@@ -211,7 +211,7 @@ for idx = 1 : length(files)
     
     
     MX(:           , idx, 40)   = ones(NumTransMax,1)*(INLET(numpipe)/PALLAREA(numpipe));
-    MX(:            , idx, 41)   = ones(NumTransMax,1)*(SJET(numpipe)/INLET(numpipe));
+    MX(:           , idx, 41)   = ones(NumTransMax,1)*(SJET(numpipe)/INLET(numpipe));
     
     
    
@@ -509,22 +509,39 @@ ylabel('$\nu$','interpreter','latex','fontsize',FSZ);
 xlabel('$12log_2(f_1 / f_{ref})$','interpreter','latex','fontsize',FSZ);
 
 %% 
+% #################################################################### 
+% BETA and NU with FREQUENCY
+% #################################################################### 
 
-% #################################################################### 
-% BETA and NU with PTARG PALLET
-% #################################################################### 
-figure(26); clf;
+figure(25); clf;
 FSZ = 15;
-scatter( log(MX(:,:,19)), log(MX(:,:,26)), 'b', 'filled');box on;
+scatter( freqlogax, log(MX(:,:,26)), 'b', 'filled');box on;
 ylabel('$\beta$','interpreter','latex','fontsize',FSZ);title('Transient');
 hold on;
 yyaxis right;
-scatter( log(MX(:,:,19)), log(MX(:,:,27)), 'r', 'filled');box on;
+scatter( freqlogax, log(MX(:,:,27)), 'r', 'filled');box on;
 % ylabel('$\nu$','interpreter','latex','fontsize',FSZ);
-% legend('$\beta$','$\nu$','interpreter','latex','fontsize',FSZ);
+legend('$\beta$','$\nu$','interpreter','latex','fontsize',FSZ);
 yyaxis right;
+
 ylabel('$\nu$','interpreter','latex','fontsize',FSZ);
-xlabel('$log PTARG pall$','interpreter','latex','fontsize',FSZ);
+xlabel('$12log_2(f_1 / f_{ref})$','interpreter','latex','fontsize',FSZ);
+
+%% 
+
+% #################################################################### 
+% BETA and NU with I21 and I31
+% #################################################################### 
+figure(); clf;
+FSZ = 15;
+scatter( log(MX(:,:,38)), log(MX(:,:,26)), 'b', 'filled');box on;
+ylabel('$\beta$','interpreter','latex','fontsize',FSZ);title('Transient');
+xlabel('I21');
+
+figure();
+scatter( log(MX(:,:,38)), log(MX(:,:,27)), 'r', 'filled');box on;
+ylabel('$\nu$','interpreter','latex','fontsize',FSZ);
+xlabel('I21');
 
 %% 
 % #################################################################### 
@@ -1032,13 +1049,16 @@ Wmmask          = WM(maskpipes);
 Inletmask       = INLET(maskpipes);
 Sjetmask        = SJET(maskpipes);
 
-NU = MX(:, :, 6);
+NU = MX(:, :, 27);
 ratios = Sjetmask./Inletmask;
 try
 for idx = 1 : size(NU,2)
-%     scatter(  log(Vf_mask(idx)*1e3), log(NU(:,idx)), 'b','filled'); % YES good
-% scatter( log( ratios(idx) ), log((NU(:,idx))), 'b','filled'); %MEDIUM good
-scatter( log( Inletmask(idx)./palletarea_mask(idx) ), log((NU(:,idx))),'b','filled'); %OK, what physical sense??
+scatter(  log(Vf_mask(idx)), log(NU(:,idx)), 'b','filled'); % YES good
+% scatter( log( ratios(idx) ), log((NU(:,idx))), 'b','filled'); 
+% scatter( log( Inletmask(idx)./palletarea_mask(idx) ), log((NU(:,idx))),'b','filled'); 
+% scatter( log( Sjetmask(idx)./palletarea_mask(idx) ), log((NU(:,idx))),'b','filled'); 
+% scatter( log( Inletmask(idx) ), log((NU(:,idx))),'b','filled'); 
+
 end
 end
 
@@ -1048,10 +1068,10 @@ hold on;
 NM = mean(NU,1, 'omitnan');
 p = polyfit(log(ratios), log(NM), 1);
 nulin = polyval(p, log(ratios) );
-plot(log(ratios), (nulin), '--r')
+% plot(log(ratios), (nulin), '--r')
 
 
 FSZ = 14;
 xlabel('$S_{jet}/S_{inlet}$ (log)','interpreter','latex','fontsize',FSZ);
-ylabel('$\nu$ fitted (log)','interpreter','latex','fontsize',FSZ);
+ylabel('$\nu$ (ln)','interpreter','latex','fontsize',FSZ);
 box on;
