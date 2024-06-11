@@ -60,4 +60,21 @@ grid on; box on;
 yyaxis right;
 plot(1e3*[0:length(ll)-1]*dt, x(ll,1));
 ylabel('Key velocity [m/s]');
+%%
+fs = 51.2e3; dt = 1/fs;
+
+objs = findobj('Type', 'Line');
+pf = objs(2).YData;
+fit = objs(1).YData;
+
+ll = 795:2141;
+pf = pf(ll);
+fit = fit(ll);
+t = [0:length(ll)-1]*dt;
+figure();
+plot(1e3*t, pf);
+hold on;
+plot(1e3*t, fit);
+xlabel('Time [ms]');
+ylabel('Pressure [Pa]');
 

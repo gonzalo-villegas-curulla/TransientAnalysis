@@ -336,11 +336,9 @@ end
 
 
 %% PRT*f1
-figure();
-scatter( 12*log2(MX(:,:,13)/440), log(MX(:,:,13).*MX(:,:,29) ), 'b', 'filled');
-ylabel('PRT * f_1 (ln)');
-xlabel('$12log_2(f_1/440)$');
 
+figure();
+scatter( 12*log2(MX()/440), MX(), 'b', 'filled');
 
 
 %% 
