@@ -337,8 +337,33 @@ end
 
 %% PRT*f1
 figure();
-scatter( 12*log2(MX(:,:,13)/440), log(MX(:,:,13).*MX(:,:,29) ), 'b', 'filled');
+scatter( 12*log2(MX(:,:,13)/440), (MX(:,:,13).*MX(:,:,29) ), 'b', 'filled');
 ylabel('PRT * f_1 (ln)');
+xlabel('$12log_2(f_1/440)$');
+
+%% PRT rad / PRT foot
+figure();
+scatter( 12*log2(MX(:,:,13)/440), log(MX(:,:,32) ), 'b', 'filled');
+ylabel('PRTrad / PRT_{foot} (ln)');
+xlabel('$12log_2(f_1/440)$');
+%% PRT foot / PRT groove
+figure();
+scatter( 12*log2(MX(:,:,13)/440), log(MX(:,:,31) ), 'b', 'filled');
+ylabel('PRT$_{foot}$ / PRT$_{grv}$ (ln)');
+xlabel('$12log_2(f_1/440)$');
+
+%% t20foot / t20 groove
+
+figure();
+scatter( 12*log2(MX(:,:,13)/440),log(MX(:,:,34)./MX(:,:,33) ), 'b', 'filled');
+ylabel('t$^{20}_{foot}$ / t$^{20}_{grv}$ (ln)');
+xlabel('$12log_2(f_1/440)$');
+
+%% t20rad / t20 foot
+
+figure();
+scatter( 12*log2(MX(:,:,13)/440),log(MX(:,:,35)-MX(:,:,34) ), 'b', 'filled');
+ylabel('t$^{20}_{rad}$ - t$^{20}_{foot}$ (ln)');
 xlabel('$12log_2(f_1/440)$');
 
 
