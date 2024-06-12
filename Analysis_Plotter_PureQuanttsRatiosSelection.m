@@ -426,8 +426,20 @@ xlabel('$12log_2(f_1/440)$');
 
 
 
-%% 
-% #################################################################### 
+%% VC factor groove
+
+factor = (MX(:,:,5)./(MX(:,:,3)*PalletDepth)).*sqrt( (MX(:,:,20) - MX(:,:,21) )./(MX(:,:,19)-MX(:,:,20)));
+
+figure();
+scatter( MX(:,:,5)*1e6, factor, 'b', 'filled');box on;
+xlabel('$S^{geo}_{in} \ [mm^2]$','interpreter','latex','fontsize',FSZ);
+ylabel('$\Gamma_{grv}$','interpreter','latex','fontsize',FSZ);
+
+
+
+
+
+%% #################################################################### 
 % Ratio of effective areas as a function of geometric areas ratio
 % #################################################################### 
 
@@ -471,6 +483,7 @@ set( get(gca,'YAxis'), 'FontSize', FSZ-8);
 % GOOD physical meaning and expected values
 % #################################################################### 
 
+%(VC factor foot)
 
 FSZ = 22;
 dataone = MX(:,:,6)./MX(:,:,5); % GEOMETRIC section Sjet/Sin,foot

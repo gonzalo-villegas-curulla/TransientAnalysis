@@ -14,8 +14,8 @@ end
 
 figure();
 % plot(allXData(allYData~='nan'), allYData(allYData~='nan'), 'o');
-plot(allXData, log(allYData), 'o');
-% plot(allXData, allYData, 'o');
+% plot(allXData, log(allYData), 'o');
+plot(allXData, allYData, 'o');
 
 %%
 fs = 51.2e3; dt = 1/fs;
