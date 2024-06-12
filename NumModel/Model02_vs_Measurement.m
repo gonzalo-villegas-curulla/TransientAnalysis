@@ -27,9 +27,10 @@
 % wavelet toolbox and system identification toolbox.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clc, clear;
+cd '/media/organ/ExtremeSSD/OrganPipe2023-2024/DataTransients/processed/NumModel'
 
 PIPENUM   = 1;
-TRANSNUM  = 1;
+TRANSNUM  = 3;
 
 files = dir('../../A*.mat');
 load(fullfile('../../',files(PIPENUM).name));
@@ -45,20 +46,41 @@ PF    = x(4,:);
 KEYV  = x(6,:);
 
 
-
 [Lp,Vf,Pw,Tnhd,Sin,Sj,Hm,h,Wm,Rp] = getgeometry(PIPENUM);
-
+Rin = sqrt(Sin/pi);
 Vgroove = Pw*0.51*0.05; % [m^3]
 Sslot   = Pw*1e-3*129.8;
 
 [KeyDownIdx,KeyUpIdx,KeyMovingTime,DurNotesInS, VelPeakIdxPos,VelPeakIdxNeg] = DetectVelocityPeaks_func( KEYV, tvec, files(PIPENUM).name);
-%%
 
 fs   = 51.2e3; 
 dt   = 1/fs;
 Tend = 1;
-tvec = [0:dt:Tend]';
+tt    = [0:dt:Tend]';
 N    = numel(tvec);
+
+PRECUT = fix(0.010*fs);
+SimulLength = fix(Tend*fs);
+ll = -PRECUT:-PRECUT + SimulLength ;
+
+pres = PRES(   KeyDownIdx(TRANSNUM)      + ll);
+pf   = PF(     KeyDownIdx(TRANSNUM)      + ll);
+keyv = abs(    KEYV(KeyDownIdx(TRANSNUM) + ll)) ;
+keyx = cumtrapz(dt, keyv);
+keyx(PRECUT + (KeyUpIdx(TRANSNUM)-KeyDownIdx(TRANSNUM)) +fix(1e-3*fs): end) =  keyx(PRECUT + ( KeyUpIdx(TRANSNUM)-KeyDownIdx(TRANSNUM))+fix(1e-3*fs) -1) ;
+
+
+if 0
+figure(21); clf;
+plot(pres);
+hold on;
+plot(pf);
+yyaxis right;
+plot(keyx);
+end
+%%
+
+
 
 % ===================================
 % Define Vena-Contracta 
@@ -66,7 +88,7 @@ N    = numel(tvec);
 VC3  = 0.70; % Vena pallet valve slot window
 VC4  = 0.62; % Vena Contracta foot inlet (Def. 0.62)
 VC5  = 0.95; % Vena foot outlet (jet) (Def. 0.95)
-ramptype = 'sin'; % 'rect'=linear, 'sin'=sinus
+ramptype = 'pall'; % 'rect'=linear, 'sin'=sinus, 'pall'=palletvalve
 
 % ===================================
 %   Physical constants and params
@@ -83,7 +105,7 @@ p2Const = 825; % [Pa] Pressostat value @ palletBox/Equiv.Resrv
 
 %%%%%%%%%%%%%%% (3)(Groove)  %%%%%%%%%%%%%%%
 
-GrvWidth  = 10.9e-3; % (6.2-15.9)mm
+GrvWidth  = Pw; %10.9e-3; % (6.2-15.9)mm
 GrvLen    = 0.51;
 GrvHeight = 49.6e-3; 
 
@@ -112,6 +134,8 @@ switch ramptype
         vec = 0.5+ 0.5*sin(sintime);
         vec = Spallet*vec;
         S3(ll) = vec;
+    case 'pall'
+        S3 = keyx*Sslot;
 end 
 mav    = dsp.MovingAverage(fix(0.001*fs));
 % S3  = mav(S3); % Optionally, smooth the ramp
@@ -176,7 +200,7 @@ ieout = [];
 while tcount < Tend
 
 % Solvers: 15s, 113 (accurate, sometimes slow), 23, 23s
-[t,y,te,ye,ie] = ode113(@(t,y) myodes(t,y,tvec,S3vec,params),[tstart tfinal], y0, opts); 
+[t,y,te,ye,ie] = ode113(@(t,y) myodes(t, y , tt, S3vec,pres,  params), [tstart tfinal], y0, opts); 
 
    % Accumulate output. If solution goes to zero, re-start with its
    % perturbated conditions.
@@ -285,7 +309,15 @@ grid on; box on; ylabel('JET VELOC.','fontsize',FSZ); xlabel('time [s]','fontsiz
 linkaxes(ax,'x');
 xlim([0 Tend]);
 
-% Below, not very relevant calculations.
+%%
+figure();
+plot(tt, pf);
+hold on;
+plot(t, p4);
+
+%%
+
+% Below here, not very relevant calculations:
 try
     % Spectrum of a signal (freqs. due to geometry changes):
     F = griddedInterpolant(tout,p4); %To choose from: u3,p3,u4,p4,u5
@@ -311,7 +343,7 @@ end
 % ==================================
 
 
-function dydt = myodes(t,y,tvec,S3vec,params)
+function dydt = myodes(t,y,tvec,S3vec,pres, params)
 
 rho = params(1);
 l3  = params(2);
@@ -325,12 +357,16 @@ l5  = params(9);
 p2Const = params(10);
 
 S3interp = interp1(tvec, S3vec, t, 'next');% nearest, next, pchip, spline, 
+p2int    = interp1(tvec, pres, t, 'next');
+
 
 dydt = zeros(5,1);
 P5   = 0;
 
     if (S3interp~=0)
-        dydt(1) = 1/rho/l3*(p2Const  -y(2))  -1/2/l3*y(1)^2    ;
+%         dydt(1) = 1/rho/l3*(p2Const  -y(2))  -1/2/l3*y(1)^2    ;
+        dydt(1) = 1/rho/l3*(p2int  -y(2))  -1/2/l3*y(1)^2    ;
+        
         dydt(2) = rho*c2/V3* ( y(1)*S3interp  -S4*y(3) )  ;
         dydt(3) = 1/rho/l4*(y(2)  - y(4))  -1/2/l4*y(3)^2 ;
         dydt(4) = rho*c2/V4*( y(3)*S4  -S5*y(5) )         ;

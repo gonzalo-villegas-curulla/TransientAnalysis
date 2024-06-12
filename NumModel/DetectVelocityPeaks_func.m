@@ -25,13 +25,7 @@ end
 
 
 
-if 0
-figure(5); clf;
-plot( (velo)  );
-hold on;
-plot(VelPeakIdxPos, VelPeakValPos,'ro');
-plot(VelPeakIdxNeg, VelPeakValNeg,'r*');
-end
+
 % =========================================
 if ne(length(VelPeakIdxNeg),length(VelPeakIdxPos))
     fprintf("NegPeaks number is not equal not PosPeak number\n")
@@ -59,7 +53,7 @@ TdownEnd  = zeros(length(VelPeakIdxNeg),1);
 % ASSUME the key will be moving downards less than this time:
 Tmove = 0.100;
 THRDWN = 0.05;
-% % % figure(6); clf; %hold on;    
+   
 for idx = 1 : NP
     
 % ASSES PRECEEDING NOISE 
@@ -67,10 +61,6 @@ seg = min(0, velo( VelPeakIdxNeg(idx)-fix(SR*Tbefore)  :VelPeakIdxNeg(idx)-fix(S
 % AMPLITUDE:
 PP = peak2peak( seg )*1;
 STD = std(seg);
-
-clf;
-% % % % % % % plot(           velo( VelPeakIdxNeg(idx)-fix(SR*Tbefore)  :VelPeakIdxNeg(idx)-fix(SR*Tbefore)+fix(SR*Tscan)   ));
-% % plot(           velo( VelPeakIdxNeg(idx)-fix(SR*Tbefore)  :VelPeakIdxNeg(idx)+fix(SR*0.060)   ));
 
 % START NEGATIVE VELOCITY =============================
 
@@ -88,17 +78,14 @@ TdownInit(idx)  = tvec(InitDownIdx);
 
 segment = velo( KeyDownIdx(idx) : KeyDownIdx(idx) + fix(SR*0.060) );
 segment(1:fix(SR*0.013)) = [-1];
+
 % FirstPosCrossingIdx = find( segment>0, 1, 'first');
 FirstPosCrossingIdx = find( segment>THRDWN*(VelPeakValNeg(idx)), 1, 'first');
 EndDownInd = KeyDownIdx(idx) + FirstPosCrossingIdx;
 KeyUpIdx(idx) = EndDownInd;
 TdownEnd(idx) = tvec(EndDownInd);
 
-% % % hold on;
-% % % plot([1,1]*(KeyDownIdx(idx)-VelPeakIdxNeg(idx)+ fix(SR*Tbefore) ),0.6*[-1,1],'--r');
-% % % plot([1,1]*(KeyUpIdx(idx)-VelPeakIdxNeg(idx)+ fix(SR*Tbefore) ),0.6*[-1,1],'--k');
-% % % hold off;
-% % % pause();
+
 
 end
 
