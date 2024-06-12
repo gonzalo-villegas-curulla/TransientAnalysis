@@ -28,12 +28,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 clc, clear;
 
-pipelist  = [1:22];
-pipenames = [03,04,05,06,07,09,10,11,13,15,17,19,24,25,27,29,32,34,38,39,41,44 ];
 PIPENUM   = 1;
 TRANSNUM  = 1;
-
-
 
 files = dir('../../A*.mat');
 load(fullfile('../../',files(PIPENUM).name));
@@ -43,18 +39,24 @@ for idx = 1 : 6
     x(idx,:) = x(idx,:) - mean(x(idx,1:1e3));
 end
 
-key = x(6,:);
 %%
-% Hm  = 
-% h   = 
-% Rin = 
+PRES  = x(2,:);
+PF    = x(4,:);
+KEYV  = x(6,:);
 
 
 
+[Lp,Vf,Pw,Tnhd,Sin,Sj,Hm,h,Wm,Rp] = getgeometry(PIPENUM);
+
+Vgroove = Pw*0.51*0.05; % [m^3]
+Sslot   = Pw*1e-3*129.8;
+
+[KeyDownIdx,KeyUpIdx,KeyMovingTime,DurNotesInS, VelPeakIdxPos,VelPeakIdxNeg] = DetectVelocityPeaks_func( KEYV, tvec, files(PIPENUM).name);
+%%
 
 fs   = 51.2e3; 
 dt   = 1/fs;
-Tend = 0.3;
+Tend = 1;
 tvec = [0:dt:Tend]';
 N    = numel(tvec);
 
@@ -215,7 +217,7 @@ toc
 
 % PREPARE FIT OPTIONS ===========================
 % Set up fittype and options.
-func = fittype( 'a./(1+exp(-b*(x-c))).^(1/d)', 'independent', 'x', 'dependent', 'y' );
+func = fittype( 'a./(1+d*exp(-b*(x-c))).^(1/d)', 'independent', 'x', 'dependent', 'y' );
 opts = fitoptions( 'Method', 'NonlinearLeastSquares' );
 opts.Display    = 'Off';
 opts.Robust     = 'Bisquare'; % LAR, Off, Bisquare
