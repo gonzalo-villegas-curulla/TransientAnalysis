@@ -369,60 +369,20 @@ xlabel('$12log_2(f_1/440)$');
 %% Sj / Sin 
 
 figure();
-scatter( 12*log2(MX(:,:,13)/440), log(MX(:,:,6)./MX(:,:,5) ), 'b', 'filled');
+scatter( 12*log2(MX(:,:,13)/440), (MX(:,:,6)./MX(:,:,5) ), 'b', 'filled');
 ylabel('$\mathcal{S}_j / \mathcal{S}_{in}$ (ln)');
 xlabel('$12log_2(f_1/440)$');
 
 %% Pgrv / Ppall
 
 figure();
-scatter( 12*log2(MX(:,:,13)/440), (MX(:,:,20)./MX(:,:,19) ), 'b', 'filled');
-ylabel('$P_{grv}/P_{pall}$');
+scatter( 12*log2(MX(:,:,13)/440), (MX(:,:,6)./MX(:,:,5) ), 'b', 'filled');
+ylabel('$P_{grv}/P_{pall}$ (ln)');
 xlabel('$12log_2(f_1/440)$');
 
 %% Pfoot / Pgrv
 
-figure();
-scatter( 12*log2(MX(:,:,13)/440), (MX(:,:,21)./MX(:,:,20) ), 'b', 'filled');
-ylabel('$P_{foot}/P_{grv}$');
-xlabel('$12log_2(f_1/440)$');
-
 %% Prad / Pfoot
-
-figure();
-scatter( 12*log2(MX(:,:,13)/440), (MX(:,:,22)./MX(:,:,21) ), 'b', 'filled');
-ylabel('$P^o_{rad}/P^o_{foot}$');
-xlabel('$12log_2(f_1/440)$');
-
-%% t80 foot
-
-figure();
-scatter( 12*log2(MX(:,:,13)/440), 1e3*(MX(:,:,29)+MX(:,:,34) ), 'b', 'filled');
-ylabel('$t^{80}_{foot}$ [ms]');
-xlabel('$12log_2(f_1/440)$');
-
-%% t80 foot / T1 = t80foot *f1
-
-figure();
-scatter( 12*log2(MX(:,:,13)/440), MX(:,:,13).*(MX(:,:,29)+MX(:,:,34) ), 'b', 'filled');
-ylabel('$t^{80}_{foot} * f_1$');
-xlabel('$12log_2(f_1/440)$');
-
-
-%% t80 rad
-
-figure();
-scatter( 12*log2(MX(:,:,13)/440), 1e3*(MX(:,:,30)+MX(:,:,35) ), 'b', 'filled');
-ylabel('$t^{80}_{rad}$ [ms]');
-xlabel('$12log_2(f_1/440)$');
-
-%% t80 rad / T1 = t80rad *f1
-
-figure();
-scatter( 12*log2(MX(:,:,13)/440), MX(:,:,13).*(MX(:,:,30)+MX(:,:,35) ), 'b', 'filled');
-ylabel('$t^{80}_{rad} * f_1$');
-xlabel('$12log_2(f_1/440)$');
-
 
 
 
