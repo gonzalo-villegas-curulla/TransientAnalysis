@@ -26,11 +26,13 @@
 % Running MATLAB R2021a. try() statements use the 
 % wavelet toolbox and system identification toolbox.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-clc, clear;
+clc, clear; fprintf('Starting script...\n');
 cd '/media/organ/ExtremeSSD/OrganPipe2023-2024/DataTransients/processed/NumModel'
 
-PIPENUM   = 1;
-TRANSNUM  = 3;
+
+PIPENUM = 1; TRANSNUM  = 3; % meeeh.
+% PIPENUM = 10; TRANSNUM = 10;
+% PIPENUM = 19; TRANSNUM = 10;
 
 files = dir('../../A*.mat');
 load(fullfile('../../',files(PIPENUM).name));
@@ -306,7 +308,6 @@ p4 = yout(:,4);
 u5 = yout(:,5);
 
 
-
 FSZ = 14;
 figure(1); clf;
 
@@ -322,9 +323,10 @@ plot(tout, p3 );
 grid on; box on; ylabel('P Groove','fontsize',FSZ);
 
 ax(3) = subplot(413);
-plot(tt,   pf); hold on;
-plot(tout, p4);
+plot(1e3*tt,   pf); hold on;
+plot(1e3*tout, p4);
 grid on; box on; ylabel('P Foot','fontsize',FSZ);
+xlabel('Time [ms]');
 
 ax(4) = subplot(414);
 plot(tt, prad);
