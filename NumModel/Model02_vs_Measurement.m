@@ -41,31 +41,35 @@ for idx = 1 : 6
 end
 
 
-PRES  = x(2,:);
+PRES  = x(2,:); % x(1,:); (Keller)
+PGRV  = x(3,:);
 PF    = x(4,:);
+PRAD  = x(5,:);
 KEYV  = x(6,:);
 
 
 [Lp,Vf,Pw,Tnhd,Sin,Sj,Hm,h,Wm,Rp] = getgeometry(PIPENUM);
-Rin = sqrt(Sin/pi);
+Rin     = sqrt(Sin/pi);
 Vgroove = Pw*0.51*0.05; % [m^3]
-Sslot   = Pw*1e-3*129.8;
+Sslot   = Pw*0.1298;
 
 [KeyDownIdx,KeyUpIdx,KeyMovingTime,DurNotesInS, VelPeakIdxPos,VelPeakIdxNeg] = DetectVelocityPeaks_func( KEYV, tvec, files(PIPENUM).name);
 
 fs   = 51.2e3; 
 dt   = 1/fs;
 Tend = 1;
-tt    = [0:dt:Tend]';
+tt   = [0:dt:Tend]';
 N    = numel(tvec);
 
-PRECUT = fix(0.010*fs);
+PRECUT      = fix(0.010*fs);
 SimulLength = fix(Tend*fs);
-ll = -PRECUT:-PRECUT + SimulLength ;
+ll          = -PRECUT:-PRECUT + SimulLength ; % Mask, selection
 
-pres = PRES(   KeyDownIdx(TRANSNUM)      + ll);
-pf   = PF(     KeyDownIdx(TRANSNUM)      + ll);
-keyv = abs(    KEYV(KeyDownIdx(TRANSNUM) + ll)) ;
+pres = PRES(   KeyDownIdx(TRANSNUM)      + ll );
+pgrv = PGRV(   KeyDownIdx(TRANSNUM)      + ll );
+pf   = PF(     KeyDownIdx(TRANSNUM)      + ll );
+prad = PRAD(   KeyDownIdx(TRANSNUM)      + ll );
+keyv = abs(    KEYV(KeyDownIdx(TRANSNUM) + ll) ) ;
 keyx = cumtrapz(dt, keyv);
 keyx(PRECUT + (KeyUpIdx(TRANSNUM)-KeyDownIdx(TRANSNUM)) +fix(1e-3*fs): end) =  keyx(PRECUT + ( KeyUpIdx(TRANSNUM)-KeyDownIdx(TRANSNUM))+fix(1e-3*fs) -1) ;
 
@@ -78,22 +82,33 @@ plot(pf);
 yyaxis right;
 plot(keyx);
 end
-%%
+
 
 % &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
-%     DATA prepared: pres, pf, keyx
+%     DATA prepared: pres, pgrv, pf, prad, keyx
 % &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
 % ===================================
 % Define Vena-Contracta 
 % ===================================
+
+
+
 VC3  = 0.70; % Vena pallet valve slot window
 VC4  = 0.62; % Vena Contracta foot inlet (Def. 0.62)
 VC5  = 0.95; % Vena foot outlet (jet) (Def. 0.95)
+
+
+
+VC5 = 0.95;
+VC4 = VC5 * ( 0.01245*(Sin*1e6) + 0.2793  );
+VC3 = VC4 * ( 0.00122*(Sin*1e6) + 0.009434 );
+
+
 ramptype = 'pall'; % 'rect'=linear, 'sin'=sinus, 'pall'=palletvalve
 
-VC3 = 1; VC4 = 1; VC5 = 1;
+% VC3 = 1; VC4 = 1; VC5 = 1;
 
 % ===================================
 %   Physical constants and params
@@ -144,7 +159,9 @@ switch ramptype
         vec = Spallet*vec;
         S3(ll) = vec;
     case 'pall'
-        S3 = keyx*Sslot;
+        % Spallet*[0, ... ,1] 
+%         S3 = keyx*Sslot;
+        S3 = (Pw + 0.1298) * keyx;
 end 
 mav    = dsp.MovingAverage(fix(0.001*fs));
 % S3  = mav(S3); % Optionally, smooth the ramp
@@ -289,6 +306,49 @@ p4 = yout(:,4);
 u5 = yout(:,5);
 
 
+
+FSZ = 14;
+figure(1); clf;
+
+ax(1) = subplot(411);
+plot(tt, pres);
+grid on; box on; ylabel('P PalletBox','fontsize',FSZ);
+yyaxis right;
+plot(tt, S3vec,'r');ylabel('Valve area','fontsize',FSZ);
+
+ax(2) = subplot(412);
+plot(tt,   pgrv); hold on;
+plot(tout, p3 );
+grid on; box on; ylabel('P Groove','fontsize',FSZ);
+
+ax(3) = subplot(413);
+plot(tt,   pf); hold on;
+plot(tout, p4);
+grid on; box on; ylabel('P Foot','fontsize',FSZ);
+
+ax(4) = subplot(414);
+plot(tt, prad);
+% hold on;
+% plot(tout, fittedPfoot);
+grid on; box on; ylabel('P Rad','fontsize',FSZ);
+
+% ax(4) = subplot(514);
+% plot(tout, p4, '-o');
+% hold on;
+% plot(tout, fittedPfoot);
+% grid on; box on; ylabel('PRESS. Foot','fontsize',FSZ);
+% title(sprintf('Beta= %1.2f; Nu: %1.3f', bfit,dfit));
+% %
+% ax(5) = subplot(515);
+% plot(tout, u5, '-o');
+% grid on; box on; ylabel('JET VELOC.','fontsize',FSZ); xlabel('time [s]','fontsize',FSZ);
+
+
+linkaxes(ax,'x');
+xlim([0 Tend]);
+
+
+%%
 FSZ = 14;
 figure(1); clf;
 ax(1) = subplot(511);
