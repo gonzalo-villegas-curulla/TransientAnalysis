@@ -40,7 +40,7 @@ for idx = 1 : 6
     x(idx,:) = x(idx,:) - mean(x(idx,1:1e3));
 end
 
-%%
+
 PRES  = x(2,:);
 PF    = x(4,:);
 KEYV  = x(6,:);
@@ -80,6 +80,9 @@ plot(keyx);
 end
 %%
 
+% &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+%     DATA prepared: pres, pf, keyx
+% &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
 
 
 % ===================================
@@ -90,12 +93,18 @@ VC4  = 0.62; % Vena Contracta foot inlet (Def. 0.62)
 VC5  = 0.95; % Vena foot outlet (jet) (Def. 0.95)
 ramptype = 'pall'; % 'rect'=linear, 'sin'=sinus, 'pall'=palletvalve
 
+VC3 = 1; VC4 = 1; VC5 = 1;
+
 % ===================================
 %   Physical constants and params
 % ===================================
 
 rho = 1.2;           % [kg/m^3]
 c   = 340; c2 = c^2; % [m/s]
+
+% ===================================
+%   Organ sections
+% ===================================
 
 
 %%%%%%%%%%%%%%% (2)(Pallet box)  %%%%%%%%%%%%%%%
@@ -140,26 +149,28 @@ end
 mav    = dsp.MovingAverage(fix(0.001*fs));
 % S3  = mav(S3); % Optionally, smooth the ramp
 
+
+
 %%%%%%%%%%%%%%% (4)(Pipe foot)  %%%%%%%%%%%%%%%
 
-V4  = 0.084e-3;       % [m^3] (Def. 0.084e-3)
+V4  = Vf;       % [m^3] (Def. 0.084e-3)
 l4  = 2e-3;           % [m]  Foot inlet channel length (NÉGL.)
-Sin = pi*(4e-3)^2;    % [m^2] Foot inlet cross-section
+Sin = pi*Rin^2;    % [m^2] Foot inlet cross-section
 
 
 %%%%%%%%%%%%%%% (5)(Flue exit)  %%%%%%%%%%%%%%% 
 
 l5  = 2e-3;      % [m] Foot outlet channel length (NÉGL.)
-S5  = 3.2940e-5; % [m^2] Foot outlet cross-section
+S5  = Sj ;% 3.2940e-5; % [m^2] Foot outlet cross-section
 
 
 % ===================================
 %  APPLY VENA CONTRACTA where relevant
 % ===================================
 
-S3vec = S3*VC3;
-S4    = pi*(Rin*1.6)^2*VC4;
-S5    = Hm*h*VC5;
+S3vec = S3      *VC3;
+S4    = Sin     *VC4;
+S5    = Sj      *VC5; % <<<<<<<<<<<<<<<<< Hm*h*VC5
 
 
 % ===================================
@@ -200,7 +211,7 @@ ieout = [];
 while tcount < Tend
 
 % Solvers: 15s, 113 (accurate, sometimes slow), 23, 23s
-[t,y,te,ye,ie] = ode113(@(t,y) myodes(t, y , tt, S3vec,pres,  params), [tstart tfinal], y0, opts); 
+[t,y,te,ye,ie] = ode113(@(t,y) myodes(t, y , tt, S3vec, pres,  params), [tstart tfinal], y0, opts); 
 
    % Accumulate output. If solution goes to zero, re-start with its
    % perturbated conditions.
@@ -284,7 +295,7 @@ ax(1) = subplot(511);
 plot(tout, u3, '-o');
 grid on; box on; ylabel('FLOW Pallet','fontsize',FSZ);
 yyaxis right;
-plot(tvec, S3vec,'r');ylabel('Valve area','fontsize',FSZ);
+plot(tt, S3vec,'r');ylabel('Valve area','fontsize',FSZ);
 %
 ax(2) = subplot(512);
 plot(tout, p3, '-o');
@@ -309,8 +320,8 @@ grid on; box on; ylabel('JET VELOC.','fontsize',FSZ); xlabel('time [s]','fontsiz
 linkaxes(ax,'x');
 xlim([0 Tend]);
 
-%%
-figure();
+
+figure(2); clf; 
 plot(tt, pf);
 hold on;
 plot(t, p4);
