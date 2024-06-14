@@ -30,7 +30,7 @@ clc, clear; fprintf('Starting script...\n');
 cd '/media/organ/ExtremeSSD/OrganPipe2023-2024/DataTransients/processed/NumModel'
 
 
-PIPENUM = 1; TRANSNUM  = 3; % meeeh.
+PIPENUM = 1; TRANSNUM  = 12; % meeeh.
 % PIPENUM = 10; TRANSNUM = 10;
 % PIPENUM = 19; TRANSNUM = 10;
 
@@ -323,10 +323,10 @@ plot(tout, p3 );
 grid on; box on; ylabel('P Groove','fontsize',FSZ);
 
 ax(3) = subplot(413);
-plot(1e3*tt,   pf); hold on;
-plot(1e3*tout, p4);
+plot(tt,   pf); hold on;
+plot(tout, p4);
 grid on; box on; ylabel('P Foot','fontsize',FSZ);
-xlabel('Time [ms]');
+xlabel('Time');
 
 ax(4) = subplot(414);
 plot(tt, prad);
