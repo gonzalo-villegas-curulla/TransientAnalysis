@@ -50,7 +50,7 @@ PRAD  = x(5,:);
 KEYV  = x(6,:);
 
 
-[Lp,Vf,Pw,Tnhd,Sin,Sj,Hm,h,Wm,Rp] = getgeometry(PIPENUM);
+[Lp,Vf,Pw,Tnhd,Sin,Sj,Hm,h,Wm,Rp,palletLHS,palletWid,palletRHS,palletHtraj] = getgeometry(PIPENUM);
 Rin     = sqrt(Sin/pi);
 Vgroove = Pw*0.51*0.05; % [m^3]
 Sslot   = Pw*0.1298;
@@ -59,7 +59,7 @@ Sslot   = Pw*0.1298;
 
 fs   = 51.2e3; 
 dt   = 1/fs;
-Tend = 1;
+Tend = 0.500;
 tt   = [0:dt:Tend]';
 N    = numel(tvec);
 
@@ -163,7 +163,8 @@ switch ramptype
     case 'pall'
         % Spallet*[0, ... ,1] 
 %         S3 = keyx*Sslot;
-        S3 = (Pw + 0.1298) * keyx;
+%         S3 = (Pw + 0.1298) * keyx;
+        S3 = (0.66*min(palletLHS,palletHtraj)+ palletWid+0.66*min(palletRHS,palletHtraj))*keyx/max(keyx);
 end 
 mav    = dsp.MovingAverage(fix(0.001*fs));
 % S3  = mav(S3); % Optionally, smooth the ramp
@@ -326,7 +327,7 @@ ax(3) = subplot(413);
 plot(tt,   pf); hold on;
 plot(tout, p4);
 grid on; box on; ylabel('P Foot','fontsize',FSZ);
-xlabel('Time');
+xlabel('Time ');
 
 ax(4) = subplot(414);
 plot(tt, prad);

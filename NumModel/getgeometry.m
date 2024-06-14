@@ -1,5 +1,7 @@
-function [Lp,Vf,Pw,Tnhd,Sin,Sj,Hm,h,Wm,Rp] = getgeometry(PIPENUM)
+function [Lp,Vf,Pw,Tnhd,Sin,Sj,Hm,h,Wm,Rp,palletLHS,palletWid,palletRHS,palletHtraj] = getgeometry(PIPENUM)
 pipenames = [03,04,05,06,07,09,10,11,13,15,17,19,24,25,27,29,32,34,38,39,41,44 ];
+
+
 load('../Geometry/Lp_m.mat'); 
 load('../Geometry/Vf_m3.mat'); 
 load('../Geometry/KoenigPalletWindWidth_m.mat');
@@ -34,4 +36,11 @@ h    = h(pipenames(PIPENUM));
 Wm   = WM(pipenames(PIPENUM));
 Dp   = DP(pipenames(PIPENUM));
 Rp   = 0.5*Dp;
+
+run PalletValveDimensions.m
+
+palletLHS   = PalletValveGeometry(pipenames(PIPENUM),1);
+palletWid   = PalletValveGeometry(pipenames(PIPENUM),2);
+palletRHS   = PalletValveGeometry(pipenames(PIPENUM),3);
+palletHtraj = PalletValveGeometry(pipenames(PIPENUM),4);
 
