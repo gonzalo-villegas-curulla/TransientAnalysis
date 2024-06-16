@@ -30,7 +30,7 @@ clc, clear; fprintf('Starting script...\n');
 cd '/media/organ/ExtremeSSD/OrganPipe2023-2024/DataTransients/processed/NumModel'
 
 
-PIPENUM = 13; TRANSNUM  = 10; 
+PIPENUM = 19; TRANSNUM  = 20; 
 % PIPENUM = 10; TRANSNUM = 10;
 % PIPENUM = 19; TRANSNUM = 10;
 
@@ -136,8 +136,8 @@ GrvWidth  = Pw; %10.9e-3; % (6.2-15.9)mm
 GrvLen    = 0.51;
 GrvHeight = 49.6e-3; 
 
-V3        = GrvWidth*GrvLen*GrvHeight;   % [m^3] Groove volume 
-l3        = 8e-3;     % [m] PalletValve-Groove slot inlet
+V3        = 1.3*GrvWidth*GrvLen*GrvHeight;   % [m^3] Groove volume 
+l3        = 1.0*8e-3;     % [m] PalletValve-Groove slot inlet
 
 % S3 "slot" measured: L=129.8mm, Width=[6.2,15.9]mm
 Spallet   = 0.1298*GrvWidth; % [m^2]
@@ -163,11 +163,19 @@ switch ramptype
         S3(ll) = vec;
     case 'pall'
         % Spallet*[0, ... ,1] 
-
-%         S3 = (Pw + 0.1298) * keyx;
-        faco = 0.7;
+        
+        % (1):
+        % S3 = (Pw + 0.1298) * keyx;
+        
+        % (2):
+        faco = 1.5+0*0.999;
         S3 = (faco*min(palletLHS,palletHtraj)+ palletWid+faco*min(palletRHS,palletHtraj))*keyx/max(keyx);
-%         S3 = keyx*Sslot;
+        
+        faco = 0.5;
+        S3 = (faco*min(palletLHS,palletHtraj)+ palletWid+faco*min(palletRHS,palletHtraj))*keyx/max(keyx);
+        
+        % (3):
+        % S3 = keyx*Sslot;
 end 
 mav    = dsp.MovingAverage(fix(0.001*fs));
 % S3  = mav(S3); % Optionally, smooth the ramp
@@ -177,13 +185,13 @@ mav    = dsp.MovingAverage(fix(0.001*fs));
 %%%%%%%%%%%%%%% (4)(Pipe foot)  %%%%%%%%%%%%%%%
 
 V4  = Vf;       % [m^3] (Def. 0.084e-3)
-l4  = 2e-3;           % [m]  Foot inlet channel length (NÉGL.)
+l4  = 0 +2e-3;           % [m]  Foot inlet channel length (NÉGL.)
 Sin = pi*Rin^2;    % [m^2] Foot inlet cross-section
 
 
 %%%%%%%%%%%%%%% (5)(Flue exit)  %%%%%%%%%%%%%%% 
 
-l5  = 2e-3;      % [m] Foot outlet channel length (NÉGL.)
+l5  = 0+2e-3;      % [m] Foot outlet channel length (NÉGL.)
 S5  = Sj ;% 3.2940e-5; % [m^2] Foot outlet cross-section
 
 
@@ -287,8 +295,10 @@ opts.Lower      = [1      1     1e-3  1e-3];
 opts.Upper      = [1000   15e3  3     30   ];
 opts.StartPoint = [guessP 100   0.050 1];
     
-xData = tsimul; % Time stamps after solver
-yData = yout(:,4); % Solved foot pressure
+% xData = tsimul; % Time stamps after solver
+% yData = yout(:,4); % Solved foot pressure
+xData = tmeas(:);
+yData = pf(:); % Solved foot pressure
 [FitRes, gof] = fit( xData, yData, func, opts );
     
 afit  = FitRes.a;
@@ -297,8 +307,9 @@ cfit  = FitRes.c;
 dfit  = FitRes.d;
 gofr2 = gof.rsquare;
 
-% Fitted func result
-fittedPfoot = afit./(1+exp(-bfit*(tsimul-cfit))).^(1/dfit);
+% Fitted func result:
+% fittedPfoot = afit./(1+exp(-bfit*(tsimul-cfit))).^(1/dfit);
+fittedPfoot = afit./(1+exp(-bfit*(tmeas-cfit))).^(1/dfit);
 
 
 % ===================================
@@ -350,13 +361,13 @@ grid on; box on; ylabel('P Groove','fontsize',FSZ);
 ax(3) = subplot(413);
 plot(tmeas,   pf); hold on;
 plot(tmeas, p4);
+% plot(tmeas, fittedPfoot,'-m');
 grid on; box on; ylabel('P Foot','fontsize',FSZ);
 xlabel('Time ');
 
 ax(4) = subplot(414);
 plot(tmeas, prad);
 % hold on;
-% plot(tsimul, fittedPfoot);
 grid on; box on; ylabel('P Rad','fontsize',FSZ);
 
 % ax(4) = subplot(514);
