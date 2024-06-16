@@ -60,7 +60,7 @@ Sslot   = Pw*0.1298;
 
 fs   = 51.2e3; 
 dt   = 1/fs;
-Tend = 0.150;
+Tend = 0.200;
 tmeas   = [0:dt:Tend]';
 N    = numel(tvec);
 
@@ -193,7 +193,7 @@ S5  = Sj ;% 3.2940e-5; % [m^2] Foot outlet cross-section
 
 S3vec = S3      *VC3;
 S4    = Sin     *VC4;
-S5    = Sj      *VC5; 
+S5    = Sj      *VC5; % <<<<<<<<<<<<<<<<< Hm*h*VC5
 
 
 % ===================================
@@ -225,7 +225,7 @@ catch
 end
 
 
-tsimul  = tstart;
+tout  = tstart;
 yout  = y0;
 teout = [];
 yeout = [];
@@ -234,12 +234,12 @@ ieout = [];
 while tcount < Tend
 
 % Solvers: 15s, 113 (accurate, sometimes slow), 23, 23s
-[t_ode,y,te,ye,ie] = ode113(@(t_ode,y) myodes(t_ode, y , tmeas, S3vec, pres,  params), [tstart tfinal], y0, opts); 
+[tsimul,y,te,ye,ie] = ode113(@(tsimul,y) myodes(tsimul, y , tmeas, S3vec, pres,  params), [tstart tfinal], y0, opts); 
 
    % Accumulate output. If solution goes to zero, re-start with its
    % perturbated conditions.
-   nt    = length(t_ode);
-   tsimul  = [tsimul; t_ode(2:nt)];
+   nt    = length(tsimul);
+   tout  = [tout; tsimul(2:nt)];
    yout  = [yout; y(2:nt,:)];
    teout = [teout; te]; 
    yeout = [yeout; ye];
@@ -255,10 +255,10 @@ while tcount < Tend
    
    % Guess of a valid first timestep: length of the last valid timestep
    % 'refine' defaulted to 4
-   opts = odeset(opts,'InitialStep',t_ode(nt)-t_ode(nt-refine),'MaxStep',t_ode(nt)-t_ode(1));
+   opts = odeset(opts,'InitialStep',tsimul(nt)-tsimul(nt-refine),'MaxStep',tsimul(nt)-tsimul(1));
 
-   tstart = t_ode(nt);
-   tcount = t_ode(end);
+   tstart = tsimul(nt);
+   tcount = tsimul(end);
    ctr    = ctr+1;
 end
 
@@ -287,7 +287,7 @@ opts.Lower      = [1      1     1e-3  1e-3];
 opts.Upper      = [1000   15e3  3     30   ];
 opts.StartPoint = [guessP 100   0.050 1];
     
-xData = tsimul; % Time stamps after solver
+xData = tout; % Time stamps after solver
 yData = yout(:,4); % Solved foot pressure
 [FitRes, gof] = fit( xData, yData, func, opts );
     
@@ -298,39 +298,25 @@ dfit  = FitRes.d;
 gofr2 = gof.rsquare;
 
 % Fitted func result
-fittedPfoot = afit./(1+exp(-bfit*(tsimul-cfit))).^(1/dfit);
+fittedPfoot = afit./(1+exp(-bfit*(tout-cfit))).^(1/dfit);
 
 
 % ===================================
 % Resample simulated results to measured query points
 % ===================================
-u3 = yout(:,1);
-p3 = yout(:,2);
-u4 = yout(:,3);
-p4 = yout(:,4);
-u5 = yout(:,5);
 
-p3 = interp1(tsimul, p3, tmeas);
-p4 = interp1(tsimul, p4, tmeas);
+p4 = interp1();
 
-% ===================================
-% Find and shift key->foot delay
-% ===================================
-ThR = 0.5*p3(end);
-shif = find(p3>ThR,1,'first') - find(pgrv>ThR,1,'first');
-p3 = circshift(p3, -shif);
-p3(1:abs(shif)) = pf(abs(shif)+1);
-
-ThR = 0.5*p4(end);
-shif = find(p4>ThR,1,'first') - find(pf>ThR,1,'first');
-p4 = circshift(p4, -shif);
-p4(1:abs(shif)) = pf(abs(shif)+1);
 
 % ===================================
 %           Plot results
 % ===================================
 
-
+u3 = yout(:,1);
+p3 = yout(:,2);
+u4 = yout(:,3);
+p4 = yout(:,4);
+u5 = yout(:,5);
 
 
 FSZ = 14;
@@ -344,30 +330,30 @@ plot(tmeas, S3vec,'r');ylabel('Valve area','fontsize',FSZ);
 
 ax(2) = subplot(412);
 plot(tmeas,   pgrv); hold on;
-plot(tmeas, p3 );
+plot(tout, p3 );
 grid on; box on; ylabel('P Groove','fontsize',FSZ);
 
 ax(3) = subplot(413);
 plot(tmeas,   pf); hold on;
-plot(tmeas, p4);
+plot(tout, p4);
 grid on; box on; ylabel('P Foot','fontsize',FSZ);
 xlabel('Time ');
 
 ax(4) = subplot(414);
 plot(tmeas, prad);
 % hold on;
-% plot(tsimul, fittedPfoot);
+% plot(tout, fittedPfoot);
 grid on; box on; ylabel('P Rad','fontsize',FSZ);
 
 % ax(4) = subplot(514);
-% plot(tsimul, p4, '-o');
+% plot(tout, p4, '-o');
 % hold on;
-% plot(tsimul, fittedPfoot);
+% plot(tout, fittedPfoot);
 % grid on; box on; ylabel('PRESS. Foot','fontsize',FSZ);
 % title(sprintf('Beta= %1.2f; Nu: %1.3f', bfit,dfit));
 % %
 % ax(5) = subplot(515);
-% plot(tsimul, u5, '-o');
+% plot(tout, u5, '-o');
 % grid on; box on; ylabel('JET VELOC.','fontsize',FSZ); xlabel('time [s]','fontsize',FSZ);
 
 
@@ -379,28 +365,28 @@ xlim([0 Tend]);
 FSZ = 14;
 figure(1); clf;
 ax(1) = subplot(511);
-plot(tsimul, u3, '-o');
+plot(tout, u3, '-o');
 grid on; box on; ylabel('FLOW Pallet','fontsize',FSZ);
 yyaxis right;
 plot(tmeas, S3vec,'r');ylabel('Valve area','fontsize',FSZ);
 %
 ax(2) = subplot(512);
-plot(tsimul, p3, '-o');
+plot(tout, p3, '-o');
 grid on; box on; ylabel('PRESS. Groove','fontsize',FSZ);
 %
 ax(3) = subplot(513);
-plot(tsimul, u4, '-o');
+plot(tout, u4, '-o');
 grid on; box on; ylabel('FLOW Foot IN','fontsize',FSZ);
 %
 ax(4) = subplot(514);
-plot(tsimul, p4, '-o');
+plot(tout, p4, '-o');
 hold on;
-plot(tsimul, fittedPfoot);
+plot(tout, fittedPfoot);
 grid on; box on; ylabel('PRESS. Foot','fontsize',FSZ);
 title(sprintf('Beta= %1.2f; Nu: %1.3f', bfit,dfit));
 %
 ax(5) = subplot(515);
-plot(tsimul, u5, '-o');
+plot(tout, u5, '-o');
 grid on; box on; ylabel('JET VELOC.','fontsize',FSZ); xlabel('time [s]','fontsize',FSZ);
 
 
@@ -411,14 +397,14 @@ xlim([0 Tend]);
 figure(2); clf; 
 plot(tmeas, pf);
 hold on;
-plot(t_ode, p4);
+plot(tsimul, p4);
 
 %%
 
 % Below here, not very relevant calculations:
 try
     % Spectrum of a signal (freqs. due to geometry changes):
-    F = griddedInterpolant(tsimul,p4); %To choose from: u3,p3,u4,p4,u5
+    F = griddedInterpolant(tout,p4); %To choose from: u3,p3,u4,p4,u5
     X = F(tvec);
     figure(2); clf;
     Wlen = 500;
@@ -474,13 +460,13 @@ P5   = 0;
 end
 
 % Zero detection of solution event triggers:
-function [value,isterminal,direction] = events1(t_ode,y)
+function [value,isterminal,direction] = events1(tsimul,y)
 value = y(4);     % detect height = 0
 isterminal = 1;   % stop the integration
 direction = 0;   % negative direction
 end
 
-function [value,isterminal,direction] = events2(t_ode,y)
+function [value,isterminal,direction] = events2(tsimul,y)
 value = y(5) | y(4);     % detect height = 0
 isterminal = 1;   % stop the integration
 direction = 0;   % negative direction
