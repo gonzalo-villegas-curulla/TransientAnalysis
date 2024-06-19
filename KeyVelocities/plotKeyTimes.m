@@ -39,6 +39,6 @@ end
 
 figure(3); clf;
 boxplot(mxWithPalletWidth, 'Widths',0.9);
-ylabel('Downwards key moving time [ms]');
+ylabel('Something to determine');
 xlabel('Measured pipe number');
 ylim([0 1.1]);

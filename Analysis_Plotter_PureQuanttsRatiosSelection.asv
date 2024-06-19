@@ -350,11 +350,11 @@ end
 %% BETA versus NU
 figure();
 scatter( log(MX(:,:,26)), log(MX(:,:,27)), 'b','filled');
-xlabel('beta ln'); ylabel('nu ln');
+xlabel('beta'); ylabel('nu');
 
 %% BETA*T1 versus NU
 figure();
-scatter(log(MX(:,:,26)./MX(:,:,13)), log(MX(:,:,27)), 'b','filled');
+scatter(MX(:,:,26)./MX(:,:,13), MX(:,:,27), 'b','filled');
 xlabel('beta*T1'); ylabel('nu');
 
 %% BETA versus Qj
