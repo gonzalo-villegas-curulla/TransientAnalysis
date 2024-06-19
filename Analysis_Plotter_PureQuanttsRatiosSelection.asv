@@ -350,31 +350,57 @@ end
 %% BETA versus NU
 figure();
 scatter( log(MX(:,:,26)), log(MX(:,:,27)), 'b','filled');
-xlabel('beta'); ylabel('nu');
-
+xlabel('beta ln'); ylabel('nu ln');
 %% BETA*T1 versus NU
 figure();
-scatter(MX(:,:,26)./MX(:,:,13), MX(:,:,27), 'b','filled');
+scatter(log(MX(:,:,26)./MX(:,:,13)), log(MX(:,:,27)), 'b','filled');
 xlabel('beta*T1'); ylabel('nu');
-
 %% BETA versus Qj
 figure();
-scatter(MX(:,:,26), MX(:,:,17), 'b','filled');
+scatter(log(MX(:,:,26)), log(MX(:,:,17)), 'b','filled');
 xlabel('beta'); ylabel('Qj');
-
 %% BETA*T1 versus Qj
+% figure();
+% scatter(log(MX(:,:,26)./MX(:,:,13)), log(MX(:,:,17)), 'b','filled');
+% xlabel('beta*T1'); ylabel('Qj');
+%% Beta*Vf,Qj
 figure();
-scatter(MX(:,:,26)./MX(:,:,13), MX(:,:,17), 'b','filled');
-xlabel('beta*T1'); ylabel('Qj');
-
+scatter( log( MX(:,:,26) ), log(MX(:,:,17)) ,'b','filled');
 %% NU vs Anything (pending to check)
 figure(24); clf;
 for idx = [1:25,27:42]
-   scatter( log(MX(:,:,27)), log(MX(:,:,idx)) , 'b','filled');
-   xlabel('beta log'); ylabel([namevarsall{idx},' (ln)']);%ylabel(num2str(idx));
+   scatter( log(MX(:,:,idx)) ,log(MX(:,:,27)), 'b','filled');
+   ylabel('nu log'); xlabel([namevarsall{idx},' (ln)']);%ylabel(num2str(idx));
    box on; drawnow();
    pause();
 end
+
+%% PRTgrv * f1 vs NU
+figure();
+scatter( log(MX(:,:,30).*MX(:,:,13)), log(MX(:,:,27)), 'b', 'filled');
+%% XXX  vs NU
+figure();
+scatter( log( abs(MX(:,:,25)) ), log(MX(:,:,27)), 'b', 'filled');
+
+%% PRTgrv * f1 vs NU
+figure();
+scatter( log(MX(:,:,30).*MX(:,:,13)), log(MX(:,:,27)), 'b', 'filled');
+
+
+
+
+
+
+%% MaxKeyVelocity vs Anything
+figure(24); clf;
+for idx = [1:41]
+   scatter( log(MX(:,:,42)), log(abs(MX(:,:,idx))) , 'b','filled');
+   xlabel('VeloMaxAbs log'); ylabel([namevarsall{idx},' (ln)']);%ylabel(num2str(idx));
+   box on; drawnow();
+   pause();
+end
+
+
 
 
 
